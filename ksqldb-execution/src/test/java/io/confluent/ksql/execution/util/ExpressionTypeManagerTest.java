@@ -296,6 +296,27 @@ public class ExpressionTypeManagerTest {
   }
 
   @Test
+  public void shouldFailIfLikeValueIsNotAString() {
+    // Given
+    UnqualifiedColumnReferenceExp invalidColumn = COL3;
+    LikePredicate invalidLike =
+            new LikePredicate(invalidColumn, new StringLiteral("%foo"), Optional.empty());
+
+    // When
+    KsqlException ex = assertThrows(
+            KsqlException.class,
+            () -> expressionTypeManager.getExpressionSqlType(invalidLike)
+    );
+
+    // Then
+    SqlType invalidColumnsType = SCHEMA.findColumn(invalidColumn.getColumnName()).get().type();
+    assertThat(
+            ex.getMessage(),
+            is(String.format("Invalid LIKE predicate - Expected: STRING Found: %s", invalidColumnsType))
+    );
+  }
+
+  @Test
   public void shouldEvaluateBooleanSchemaForInExpression() {
     final Expression expression = new InPredicate(
         TestExpressions.COL0,

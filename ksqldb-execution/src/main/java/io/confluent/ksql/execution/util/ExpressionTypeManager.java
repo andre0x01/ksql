@@ -359,6 +359,17 @@ public class ExpressionTypeManager {
     public Void visitLikePredicate(
         final LikePredicate node, final Context context
     ) {
+      process(node.getValue(), context);
+      final SqlType sqlTypeOfValue = context.getSqlType();
+
+      if (sqlTypeOfValue.baseType() != SqlBaseType.STRING) {
+        throw new KsqlException(
+                String.format(
+                        "Invalid LIKE predicate - Expected: %s Found: %s",
+                        SqlBaseType.STRING, sqlTypeOfValue.baseType()
+                )
+        );
+      }
       context.setSqlType(SqlTypes.BOOLEAN);
       return null;
     }

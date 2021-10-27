@@ -29,6 +29,7 @@ import io.confluent.ksql.execution.expression.tree.ComparisonExpression;
 import io.confluent.ksql.execution.expression.tree.ComparisonExpression.Type;
 import io.confluent.ksql.execution.expression.tree.Expression;
 import io.confluent.ksql.execution.expression.tree.IntegerLiteral;
+import io.confluent.ksql.execution.expression.tree.LikePredicate;
 import io.confluent.ksql.execution.expression.tree.Literal;
 import io.confluent.ksql.execution.expression.tree.LogicalBinaryExpression;
 import io.confluent.ksql.execution.expression.tree.LongLiteral;
@@ -274,12 +275,17 @@ public class QueryFilterNode extends SingleSourcePlanNode {
 
     @Override
     public Void process(final Expression node, final Object context) {
-      if (!(node instanceof LogicalBinaryExpression)
-          && !(node instanceof ComparisonExpression)) {
+      if (isInvalidWhereClause(node)) {
         throw invalidWhereClauseException("Unsupported expression in WHERE clause: " + node, false);
       }
       super.process(node, context);
       return null;
+    }
+
+    private boolean isInvalidWhereClause(final Expression node) {
+      return !(node instanceof LogicalBinaryExpression)
+              && !(node instanceof ComparisonExpression)
+              && !(node instanceof LikePredicate);
     }
 
     @Override
@@ -356,6 +362,18 @@ public class QueryFilterNode extends SingleSourcePlanNode {
         }
         return null;
       }
+    }
+
+    @Override
+    public Void visitLikePredicate(final LikePredicate node, final Object context) {
+      setTableScanOrElseThrow(
+              () -> new KsqlException(
+                      String.format("A LIKE predicate requires table scans to be enabled. "
+                                      + "See property %s for further details",
+                              KsqlConfig.KSQL_QUERY_PULL_TABLE_SCAN_ENABLED)
+              )
+      );
+      return null;
     }
 
     private boolean isKeyQuery(final ComparisonExpression node) {

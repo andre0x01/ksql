@@ -27,21 +27,9 @@ import com.google.common.collect.BoundType;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
 import io.confluent.ksql.GenericKey;
-import io.confluent.ksql.execution.expression.tree.ArithmeticUnaryExpression;
+import io.confluent.ksql.execution.expression.tree.*;
 import io.confluent.ksql.execution.expression.tree.ArithmeticUnaryExpression.Sign;
-import io.confluent.ksql.execution.expression.tree.BooleanLiteral;
-import io.confluent.ksql.execution.expression.tree.BytesLiteral;
-import io.confluent.ksql.execution.expression.tree.ComparisonExpression;
 import io.confluent.ksql.execution.expression.tree.ComparisonExpression.Type;
-import io.confluent.ksql.execution.expression.tree.Expression;
-import io.confluent.ksql.execution.expression.tree.InListExpression;
-import io.confluent.ksql.execution.expression.tree.InPredicate;
-import io.confluent.ksql.execution.expression.tree.IntegerLiteral;
-import io.confluent.ksql.execution.expression.tree.LogicalBinaryExpression;
-import io.confluent.ksql.execution.expression.tree.NullLiteral;
-import io.confluent.ksql.execution.expression.tree.StringLiteral;
-import io.confluent.ksql.execution.expression.tree.TimeLiteral;
-import io.confluent.ksql.execution.expression.tree.UnqualifiedColumnReferenceExp;
 import io.confluent.ksql.metastore.MetaStore;
 import io.confluent.ksql.metastore.model.DataSource.DataSourceType;
 import io.confluent.ksql.name.ColumnName;
@@ -840,6 +828,36 @@ public class QueryFilterNodeTest {
     assertThat(keys.size(), is(1));
     final KeyConstraint keyConstraint = (KeyConstraint) keys.get(0);
     assertThat(keyConstraint.getKey(), is(GenericKey.genericKey(1, 2)));
+  }
+
+  @Test
+  public void shouldTableScanFromLikePredicateOnNonKeyCol() {
+    // given
+    when(plannerOptions.getTableScansEnabled()).thenReturn(true);
+    when(source.getSchema()).thenReturn(STRING_SCHEMA);
+    LikePredicate likePredicate = new LikePredicate(
+            new UnqualifiedColumnReferenceExp(COL0),
+            new StringLiteral("%someSubstring%"),
+            Optional.empty()
+    );
+
+    // Then
+    expectTableScan(likePredicate, false);
+  }
+
+  @Test
+  public void shouldTableScanFromLikePredicateOnKeyCol() {
+    // given
+    when(plannerOptions.getTableScansEnabled()).thenReturn(true);
+    when(source.getSchema()).thenReturn(STRING_SCHEMA);
+    LikePredicate likePredicate = new LikePredicate(
+            new UnqualifiedColumnReferenceExp(K),
+            new StringLiteral("%someSubstring%"),
+            Optional.empty()
+    );
+
+    // Then
+    expectTableScan(likePredicate, false);
   }
 
   @Test
