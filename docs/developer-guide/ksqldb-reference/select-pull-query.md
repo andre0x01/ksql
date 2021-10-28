@@ -48,11 +48,13 @@ by enabling table scans in your current CLI session with the command `SET 'ksql.
 Table scans can also be enabled by default by setting a server configuration property with 
 `ksql.query.pull.table.scan.enabled=true`. Once table scans are enabled, the following additional expressions are allowed:
 
--   Key column(s) using range comparisons to literals.
--   Non-key columns to be used alone, without key references.
--   Columns to be compared to other columns.
--   References to subsets of columns from a multi-column key.
--   Complex expressions without direct column references using UDFs and function calls (e.g. `instr(NAME_COL, 'hello') > 0`).
+- Key column(s) using range comparisons to literals.
+- Non-key columns to be used alone, without key references.
+- Columns to be compared to other columns.
+- References to subsets of columns from a multi-column key.
+- LIKE pattern matching expressions.
+- Complex expressions without direct column references using UDFs and function calls (e.g. `instr(NAME_COL, 'hello') > 0`).
+
 
 !!! note
 	Table scan based queries are just the next incremental step for ksqlDB pull queries. 
