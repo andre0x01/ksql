@@ -140,7 +140,7 @@ See the [KLIP Readme](design-proposals/README.md) for more info.
 Code changes are submitted via a pull request (PR). When submitting a PR use the following guidelines:
 
 * Follow the style guide below
-* Add/update documentation appropriately for the change you are making. For more information, see the [docs readme](docs/readme.md).
+* Add/update documentation appropriately for the change you are making. For more information, see the [docs readme](docs/README.md).
 * Non-trivial changes should include unit tests covering the new functionality and potentially [function tests](ksql-engine/src/test/resources/query-validation-tests/README.md).
 * All SQL syntax changes and enhancements should come with appropriate [function tests](ksql-engine/src/test/resources/query-validation-tests/README.md).
 * Bug fixes should include a unit test or integration test potentially [function tests](ksql-engine/src/test/resources/query-validation-tests/README.md) proving the issue is fixed.
